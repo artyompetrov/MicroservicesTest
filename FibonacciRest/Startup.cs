@@ -25,13 +25,16 @@ namespace FibonacciRest
         public void ConfigureServices(IServiceCollection services)
         {
 
+            //TODO: read env variables
+            var variable = Environment.GetEnvironmentVariable("123");
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "FibonacciRest", Version = "v1" });
             });
 
-            //TODO: Implement distributed cache in future
+            // AddDistributedMemoryCache is used because we may need to use Redis instead of MemoryCache in the future
             services.AddDistributedMemoryCache();
         }
 

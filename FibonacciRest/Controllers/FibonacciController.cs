@@ -6,8 +6,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Fibonacci.Common;
+using Fibonacci.Common.Model;
+using Fibonacci.Common.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+
 
 namespace FibonacciRest.Controllers
 {
@@ -17,29 +20,27 @@ namespace FibonacciRest.Controllers
     {
         private readonly ILogger<FibonacciController> _logger;
         private readonly IDistributedCache _distributedCache;
-
-
+        
 
         public FibonacciController(ILogger<FibonacciController> logger, IDistributedCache distributedCache)
         {
             _logger = logger;
-            _distributedCache = distributedCache;
+            _distributedCache = distributedCache.ToKeyPrefixed("fibonacci_rest_");
         }
 
-
-        //TODO: прочитать про CancellationToken cancellationToken
+        
         [HttpPost]
-        public async Task<ActionResult> PostAsync(FibonacciData data, CancellationToken cancellationToken)
+        public async Task<ActionResult> PostAsync(FibonacciData data, CancellationToken cancellationToken = new CancellationToken())
         {
-#if DEBUG
+            //TODO: прочитать про CancellationToken cancellationToken
             //TODO: Прочитать статью https://habr.com/ru/post/482354/
-            var x = await _distributedCache.GetAsync("", cancellationToken)
+            
+            var x = await _distributedCache.GetAsync(data.SessionId, cancellationToken)
                 .ConfigureAwait(false);
 
             _logger.LogInformation($"Received Post {data.SessionId.ToString()} {data.ToString()}");
 
 
-#endif
             return Ok();
         }
     }

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fibonacci.Common
+namespace Fibonacci.Common.Model
 {
     public class FibonacciData
     {
-        public Guid SessionId { get; set; }
+        public string SessionId { get; set; }
         public int NiValue { get; set; }
     }
 }
