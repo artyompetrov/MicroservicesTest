@@ -1,23 +1,41 @@
-﻿using System.Threading;
+﻿using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace Fibonacci.Common.Services
 {
-    class KeyPrefixedCache : IDistributedCache
+    public class KeyPrefixedCache : IDistributedCache
     {
         private readonly IDistributedCache _distributedCache;
         private readonly string _keyPrefix;
+        private readonly bool _useCommonPrefix;
 
-        public KeyPrefixedCache(IDistributedCache distributedCache, string keyPrefix)
+        internal KeyPrefixedCache(IDistributedCache distributedCache, string keyPrefix, bool useCommonPrefix = true)
         {
             _distributedCache = distributedCache;
             _keyPrefix = keyPrefix;
+            _useCommonPrefix = useCommonPrefix;
         }
+
+        /// <summary>
+        /// Sets common prefix for KeyPrefixedCache among the AppDomain
+        /// </summary>
+        public static string CommonPrefix { get; set; } = string.Empty;
 
         private string AddPrefix(string key)
         {
-            return _keyPrefix + key;
+            //TODO: may be a good idea to implement key concatenation using thread-safe StringBuilder
+
+            if (_useCommonPrefix)
+            {
+                return CommonPrefix + _keyPrefix + key;
+            }
+            else
+            {
+                return _keyPrefix + key;
+
+            }
         }
 
         public byte[] Get(string key) => _distributedCache.Get(AddPrefix(key));

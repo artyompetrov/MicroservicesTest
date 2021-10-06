@@ -25,7 +25,7 @@ namespace FibonacciRest.Controllers
         public FibonacciController(ILogger<FibonacciController> logger, IDistributedCache distributedCache)
         {
             _logger = logger;
-            _distributedCache = distributedCache.ToKeyPrefixed("fibonacci_rest_");
+            _distributedCache = distributedCache.ToKeyPrefixed("fibonacci_");
         }
 
         
