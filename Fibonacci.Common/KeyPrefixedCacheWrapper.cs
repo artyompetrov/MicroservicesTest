@@ -3,15 +3,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace Fibonacci.Common.Services
+namespace Fibonacci.Common
 {
-    public class KeyPrefixedCache : IDistributedCache
+    public class KeyPrefixedCacheWrapper : IDistributedCache
     {
         private readonly IDistributedCache _distributedCache;
         private readonly string _keyPrefix;
         private readonly bool _useCommonPrefix;
 
-        internal KeyPrefixedCache(IDistributedCache distributedCache, string keyPrefix, bool useCommonPrefix = true)
+        internal KeyPrefixedCacheWrapper(IDistributedCache distributedCache, string keyPrefix, bool useCommonPrefix = true)
         {
             _distributedCache = distributedCache;
             _keyPrefix = keyPrefix;
@@ -19,7 +19,7 @@ namespace Fibonacci.Common.Services
         }
 
         /// <summary>
-        /// Sets common prefix for KeyPrefixedCache among the AppDomain
+        /// Sets common prefix for KeyPrefixedCacheWrapper among the AppDomain
         /// </summary>
         public static string CommonPrefix { get; set; } = string.Empty;
 

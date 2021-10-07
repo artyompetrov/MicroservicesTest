@@ -5,7 +5,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Fibonacci.Common.Services;
 using Microsoft.Extensions.Caching.Distributed;
 
 
@@ -15,14 +14,16 @@ namespace Fibonacci.Common.Extensions
     {
         public static IDistributedCache ToKeyPrefixed(this IDistributedCache distributedCache, string prefix)
         {
-            return new KeyPrefixedCache(distributedCache, prefix);
+            return new KeyPrefixedCacheWrapper(distributedCache, prefix);
         }
 
         //TODO: check that CancellationToken is used correctly
         public static async Task<T> GetFromJsonAsync<T>(this IDistributedCache distributedCache, string key, CancellationToken token = default)
-            where T : class
+            where T : class?
+
         {
-            var json = await distributedCache.GetStringAsync(key, token);
+            var json = await distributedCache.GetStringAsync(key, token)
+                .ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(json))
             {

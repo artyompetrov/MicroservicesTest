@@ -12,6 +12,10 @@ namespace FibonacciRest
         /// </summary>
         public int WorkersCount { get; private set; }
 
+        /// <summary>
+        /// RabbitMQ connection string
+        /// </summary>
+        public string RmqConnectionString { get; private set; }
 
 
         private static EnvironmentVariables _instance;
@@ -29,6 +33,8 @@ namespace FibonacciRest
 
             var workersCount = Environment.GetEnvironmentVariable("WORKERS_COUNT");
             _instance.WorkersCount = workersCount != null ? int.Parse(workersCount) : 0;
+
+            _instance.RmqConnectionString = Environment.GetEnvironmentVariable("RMQ_CONNECTION_STRING");
 
             return _instance;
         }

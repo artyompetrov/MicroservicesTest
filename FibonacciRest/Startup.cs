@@ -11,7 +11,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Fibonacci.Common.Services;
+using EasyNetQ;
+using Fibonacci.Common;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace FibonacciRest
@@ -22,15 +23,19 @@ namespace FibonacciRest
         {
             Configuration = configuration;
 
-            KeyPrefixedCache.CommonPrefix = "rest_";
+            KeyPrefixedCacheWrapper.CommonPrefix = "rest_";
         }
 
         public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(EnvironmentVariables.Get());
+            var environmentVariables = EnvironmentVariables.Get();
 
+            services.AddSingleton(environmentVariables);
+
+            var rmqBus = RabbitHutch.CreateBus(environmentVariables.RmqConnectionString);
+            services.AddSingleton<IBus>(rmqBus);
             
             services.AddControllers();
             services.AddSwaggerGen(c =>

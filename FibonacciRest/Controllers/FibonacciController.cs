@@ -28,19 +28,27 @@ namespace FibonacciRest.Controllers
             _distributedCache = distributedCache.ToKeyPrefixed("fibonacci_");
         }
 
-        
+
         [HttpPost]
-        public async Task<ActionResult> PostAsync(FibonacciData data, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<ActionResult> PostAsync(FibonacciData data)
         {
             //TODO: прочитать про CancellationToken cancellationToken
             //TODO: Прочитать статью https://habr.com/ru/post/482354/
-            
-            var x = await _distributedCache.GetAsync(data.SessionId, cancellationToken)
+
+            var sessionState = await _distributedCache
+                .GetFromJsonAsync<SessionState>(data.SessionId)
                 .ConfigureAwait(false);
 
-            _logger.LogInformation($"Received Post {data.SessionId.ToString()} {data.ToString()}");
+            var currentValue = sessionState.NPreviousValue + data.NiValue;
 
 
+            //TODO: Send data to RMQ
+
+
+            sessionState.NPreviousValue = currentValue;
+            await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState)
+                .ConfigureAwait(false);
+            
             return Ok();
         }
     }
