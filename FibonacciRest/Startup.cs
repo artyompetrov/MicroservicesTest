@@ -19,22 +19,21 @@ namespace FibonacciRest
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
 
             KeyPrefixedCacheWrapper.CommonPrefix = "rest_";
         }
 
-        public IConfiguration Configuration { get; }
-
         public void ConfigureServices(IServiceCollection services)
         {
-            var environmentVariables = EnvironmentVariables.Get();
+            var options = Options.Get(_configuration);
+            services.AddSingleton(options);
 
-            services.AddSingleton(environmentVariables);
-
-            var rmqBus = RabbitHutch.CreateBus(environmentVariables.RmqConnectionString);
+            var rmqBus = RabbitHutch.CreateBus(options.RmqConnectionString);
             services.AddSingleton<IBus>(rmqBus);
             
             services.AddControllers();

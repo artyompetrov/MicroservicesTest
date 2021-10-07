@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
@@ -19,8 +15,7 @@ namespace Fibonacci.Common.Extensions
 
         //TODO: check that CancellationToken is used correctly
         public static async Task<T> GetFromJsonAsync<T>(this IDistributedCache distributedCache, string key, CancellationToken token = default)
-            where T : class?
-
+            where T : class
         {
             var json = await distributedCache.GetStringAsync(key, token)
                 .ConfigureAwait(false);
@@ -31,6 +26,21 @@ namespace Fibonacci.Common.Extensions
             }
 
             return JsonSerializer.Deserialize<T>(json);
+        }
+
+        public static async Task<T> GetFromJsonOrCreateAsync<T>(this IDistributedCache distributedCache, string key,
+            CancellationToken token = default)
+            where T : class, new()
+        {
+            var obj = await GetFromJsonAsync<T>(distributedCache, key, token);
+
+            if (obj == null)
+            {
+                obj = new T();
+                await SetAsJsonAsync(distributedCache, key, obj, token);
+            }
+
+            return obj;
         }
 
         public static Task SetAsJsonAsync<T>(this IDistributedCache distributedCache, string key, T value, CancellationToken token = default)
