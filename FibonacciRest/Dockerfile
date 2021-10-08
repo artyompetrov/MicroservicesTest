@@ -6,7 +6,7 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["FibonacciRest/FibonacciRest.csproj", "FibonacciRest/"]
+COPY ["FibonacciRest.csproj", "FibonacciRest/"]
 RUN dotnet restore "FibonacciRest/FibonacciRest.csproj"
 COPY . .
 WORKDIR "/src/FibonacciRest"
