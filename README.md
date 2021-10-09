@@ -2,6 +2,7 @@
 
 Stack:
 * ASP.NET Core 5
+* DistributedMemoryCache
 * Swagger (OpenAPI)
 * RabbitMQ + EasyNetQ
 * Docker Compose
