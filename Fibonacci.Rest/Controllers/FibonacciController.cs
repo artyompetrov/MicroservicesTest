@@ -12,7 +12,7 @@ using Fibonacci.Common.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
 
 
-namespace FibonacciRest.Controllers
+namespace Fibonacci.Rest.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -35,6 +35,8 @@ namespace FibonacciRest.Controllers
         {
             //TODO: прочитать про CancellationToken cancellationToken
             //TODO: Прочитать статью https://habr.com/ru/post/482354/
+
+            _logger.LogWarning("received task");
 
             var sessionState = await _distributedCache
                 .GetFromJsonOrCreateAsync<SessionState>(data.SessionId)

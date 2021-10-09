@@ -15,7 +15,7 @@ using EasyNetQ;
 using Fibonacci.Common;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace FibonacciRest
+namespace Fibonacci.Rest
 {
     public class Startup
     {
@@ -48,7 +48,8 @@ namespace FibonacciRest
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            //TODO: turn off swagger in Release
+            //if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
