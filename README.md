@@ -1,7 +1,7 @@
 # MicroservicesTest
 
 Stack:
-* ASP.NET Core 
+* ASP.NET Core 5
 * Swagger (OpenAPI)
 * RabbitMQ + EasyNetQ
 * Docker Compose
