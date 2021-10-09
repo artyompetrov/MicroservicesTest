@@ -1,6 +1,6 @@
 # MicroservicesTest
 
-Stack:
+Tech stack:
 * ASP.NET Core 5
 * DistributedMemoryCache
 * Swagger (OpenAPI)
