@@ -27,7 +27,7 @@ namespace Fibonacci.Rest.Controllers
         {
             _logger = logger;
             _bus = bus;
-            _distributedCache = distributedCache.ToKeyPrefixed("fibonacci_");
+            _distributedCache = distributedCache.ToKeyPrefixed("FibonacciController_");
         }
 
         [HttpPost]
@@ -36,6 +36,7 @@ namespace Fibonacci.Rest.Controllers
             //TODO: прочитать про CancellationToken cancellationToken
             //TODO: Прочитать статью https://habr.com/ru/post/482354/
 
+            //TODO: Add logging
             _logger.LogWarning("received task");
 
             var sessionState = await _distributedCache
@@ -45,10 +46,15 @@ namespace Fibonacci.Rest.Controllers
 
             var currentValue = sessionState.NPreviousValue + data.NiValue;
 
-            await _bus.PubSub.PublishAsync("Test")
+            var answerData = new FibonacciData()
+            {
+                SessionId = data.SessionId,
+                NiValue = currentValue
+            };
+            
+            await _bus.PubSub.PublishAsync(answerData)
                 .ConfigureAwait(false);
             
-
             sessionState.NPreviousValue = currentValue;
             await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState)
                 .ConfigureAwait(false);

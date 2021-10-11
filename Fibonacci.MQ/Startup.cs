@@ -7,13 +7,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EasyNetQ;
+using Microsoft.Extensions.Configuration;
+using Fibonacci.Common;
 
 namespace Fibonacci.MQ
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            
+            KeyPrefixedCacheWrapper.CommonPrefix = "FibonacciMq_";
+        }
+        
         public void ConfigureServices(IServiceCollection services)
         {
+            var options = FibonacciMqOptions.Get(_configuration);
+            services.AddSingleton(options);
+
+            var rmqBus = RabbitHutch.CreateBus(options.RmqConnectionString);
+            services.AddSingleton<IBus>(rmqBus);
+
+            services.AddSingleton(rmqBus);
+
+            // AddDistributedMemoryCache is used because we may need to use Redis (or smth similar) instead of MemoryCache in the future
+            services.AddDistributedMemoryCache();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

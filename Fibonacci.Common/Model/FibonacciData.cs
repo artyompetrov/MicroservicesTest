@@ -10,5 +10,6 @@ namespace Fibonacci.Common.Model
     {
         public string SessionId { get; set; }
         public int NiValue { get; set; }
+
     }
 }

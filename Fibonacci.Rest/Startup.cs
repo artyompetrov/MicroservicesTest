@@ -25,12 +25,12 @@ namespace Fibonacci.Rest
         {
             _configuration = configuration;
 
-            KeyPrefixedCacheWrapper.CommonPrefix = "rest_";
+            KeyPrefixedCacheWrapper.CommonPrefix = "FibonacciRest_";
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var options = Options.Get(_configuration);
+            var options = FibonacciRestOptions.Get(_configuration);
             services.AddSingleton(options);
 
             var rmqBus = RabbitHutch.CreateBus(options.RmqConnectionString);
@@ -48,8 +48,7 @@ namespace Fibonacci.Rest
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //TODO: turn off swagger in Release
-            //if (env.IsDevelopment())
+            if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
