@@ -31,19 +31,20 @@ namespace Fibonacci.Rest.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> PostAsync(FibonacciData data)
+        //TODO: read about CancellationToken
+        public async Task<ActionResult> PostAsync(FibonacciData data /*token*/)
         {
-            //TODO: прочитать про CancellationToken cancellationToken
-            //TODO: Прочитать статью https://habr.com/ru/post/482354/
-
-            //TODO: Add logging
-            _logger.LogWarning("received task");
+            
+            //TODO: read about https://habr.com/ru/post/482354/
+            
+            _logger.LogInformation($"Received {nameof(FibonacciData)} via WebApi with " +
+                               $"{nameof(FibonacciData.SessionId)} = {data.SessionId};" +
+                               $"{nameof(FibonacciData.NiValue)} = {data.NiValue}");
 
             var sessionState = await _distributedCache
                 .GetFromJsonOrCreateAsync<SessionState>(data.SessionId)
                 .ConfigureAwait(false);
-
-
+            
             var currentValue = sessionState.NPreviousValue + data.NiValue;
 
             var answerData = new FibonacciData()

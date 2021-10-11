@@ -3,7 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>	
-	<DockerfileRunEnvironmentFiles>debug.env</DockerfileRunEnvironmentFiles>
+	  <DockerfileRunEnvironmentFiles>debug.env</DockerfileRunEnvironmentFiles>
+    <DockerfileRunArguments>--network microservicestest_default</DockerfileRunArguments>
   </PropertyGroup>
 
   <ItemGroup>

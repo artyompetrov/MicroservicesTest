@@ -17,8 +17,13 @@ namespace Fibonacci.MQ
         /// </summary>
         public string RmqConnectionString { get; private set; }
 
-        
-        
+
+        /// <summary>
+        /// Fibonacci Web Api connection string
+        /// </summary>
+        public string FibonacciRestUri { get; private set; }
+
+
         private readonly IConfiguration _configuration;
         private static FibonacciMqOptions _instance;
 
@@ -30,10 +35,13 @@ namespace Fibonacci.MQ
         {
             // TODO: should make Get method thread-safe
             if (_instance != null) return _instance;
+
             _instance = new FibonacciMqOptions(configuration);
             
             _instance.RmqConnectionString = Environment.GetEnvironmentVariable("RMQ_CONNECTION_STRING");
 
+            _instance.FibonacciRestUri = Environment.GetEnvironmentVariable("FIBONACCI_REST_URI");
+            
             return _instance;
         }
 

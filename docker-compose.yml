@@ -6,7 +6,7 @@ services:
       - "15672:15672"
     volumes:
       - 'rabbitmq_data:/data'
- fibonacci_rest:
+ fibonacci.rest:
     build:
      context: ./
      dockerfile: ./Fibonacci.Rest/Dockerfile
@@ -15,9 +15,12 @@ services:
     environment:
       - WORKERS_COUNT=1
       - RMQ_CONNECTION_STRING=host=rabbitmq
- fibonacci_mq:
+ fibonacci.mq:
     build:
      context: ./
      dockerfile: ./Fibonacci.MQ/Dockerfile
+    environment:
+      - RMQ_CONNECTION_STRING=host=rabbitmq
+      - FIBONACCI_REST_URI=http://fibonacci.rest/Fibonacci
 volumes:
   rabbitmq_data:

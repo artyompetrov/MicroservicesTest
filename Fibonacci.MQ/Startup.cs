@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using EasyNetQ;
 using Microsoft.Extensions.Configuration;
 using Fibonacci.Common;
+using Fibonacci.MQ.HostedServices;
 
 namespace Fibonacci.MQ
 {
@@ -36,6 +37,8 @@ namespace Fibonacci.MQ
 
             // AddDistributedMemoryCache is used because we may need to use Redis (or smth similar) instead of MemoryCache in the future
             services.AddDistributedMemoryCache();
+
+            services.AddHostedService<FibonacciMqHostedService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
