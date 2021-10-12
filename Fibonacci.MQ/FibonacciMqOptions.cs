@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 
 namespace Fibonacci.MQ
 {
@@ -13,17 +10,23 @@ namespace Fibonacci.MQ
     public class FibonacciMqOptions
     {
         /// <summary>
+        /// Count of concurrent workers
+        /// </summary>
+        public int WorkersCount { get; private set; }
+
+        /// <summary>
         /// RabbitMQ connection string
         /// </summary>
         public string RmqConnectionString { get; private set; }
 
 
         /// <summary>
-        /// Fibonacci Web Api connection string
+        /// Fibonacci.Rest WebApi connection string
         /// </summary>
         public string FibonacciRestUri { get; private set; }
 
-
+        #region InitializationAndPrivateFields
+        
         private readonly IConfiguration _configuration;
         private static FibonacciMqOptions _instance;
 
@@ -37,11 +40,14 @@ namespace Fibonacci.MQ
             if (_instance != null) return _instance;
 
             _instance = new FibonacciMqOptions(configuration);
-            
+
             _instance.RmqConnectionString = Environment.GetEnvironmentVariable("RMQ_CONNECTION_STRING");
 
             _instance.FibonacciRestUri = Environment.GetEnvironmentVariable("FIBONACCI_REST_URI");
-            
+
+            var workersCount = Environment.GetEnvironmentVariable("WORKERS_COUNT");
+            _instance.WorkersCount = workersCount != null ? int.Parse(workersCount) : 1;
+
             return _instance;
         }
 
@@ -49,5 +55,7 @@ namespace Fibonacci.MQ
         {
             _configuration = configuration;
         }
+
+        #endregion
     }
 }

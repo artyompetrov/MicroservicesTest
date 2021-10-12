@@ -1,7 +1,6 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.Caching.Distributed;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace Fibonacci.Common
 {

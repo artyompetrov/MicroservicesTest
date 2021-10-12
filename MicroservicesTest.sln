@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69BA1348-10E5-49D6-A409-DAB910F89660}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fibonacci.MQ", "Fibonacci.MQ\Fibonacci.MQ.csproj", "{1A6A8102-3AD2-4E3A-9AAD-E001148B8DD7}"

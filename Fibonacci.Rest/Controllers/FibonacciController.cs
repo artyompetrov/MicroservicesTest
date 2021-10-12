@@ -1,15 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyNetQ;
-using Fibonacci.Common;
-using Fibonacci.Common.Model;
+﻿using EasyNetQ;
 using Fibonacci.Common.Extensions;
+using Fibonacci.Common.Model;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 
 namespace Fibonacci.Rest.Controllers
@@ -39,7 +34,7 @@ namespace Fibonacci.Rest.Controllers
             
             _logger.LogInformation($"Received {nameof(FibonacciData)} via WebApi with " +
                                $"{nameof(FibonacciData.SessionId)} = {data.SessionId};" +
-                               $"{nameof(FibonacciData.NiValue)} = {data.NiValue}");
+                               $"{nameof(FibonacciData.NiValue)} = {data.NiValue.ToString()}");
 
             var sessionState = await _distributedCache
                 .GetFromJsonOrCreateAsync<SessionState>(data.SessionId)

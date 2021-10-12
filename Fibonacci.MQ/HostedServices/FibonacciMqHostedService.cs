@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyNetQ;
+﻿using EasyNetQ;
 using Fibonacci.Common.Extensions;
 using Fibonacci.Common.Model;
 using Fibonacci.MQ.ServiceReferences;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Fibonacci.MQ.HostedServices
 {
@@ -27,48 +24,72 @@ namespace Fibonacci.MQ.HostedServices
         {
             _bus = bus;
             _logger = logger;
-            _distributedCache = distributedCache.ToKeyPrefixed("FibonacciMqHostedService_");
             _options = options;
+            _distributedCache = distributedCache.ToKeyPrefixed("FibonacciMqHostedService_");
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await _bus.PubSub.SubscribeAsync<FibonacciData>(nameof(FibonacciMqHostedService),
-                FibonacciDataReceived, FibonacciDataConfigure, stoppingToken);
+                FibonacciDataReceivedAsync, FibonacciDataConfigure, stoppingToken);
+
+
+            var runningTasks = new Task[_options.WorkersCount];
+
+            for (var workerNumber = 0; workerNumber < _options.WorkersCount; workerNumber++)
+            {
+                var randomSessionId = Guid.NewGuid().ToString();
+
+                await _distributedCache
+                    .GetFromJsonOrCreateAsync<SessionState>(randomSessionId)
+                    .ConfigureAwait(false);
+
+                runningTasks[workerNumber] = SendFibonacciValueAsync(randomSessionId, 1);
+            }
+
+            await Task.WhenAll(runningTasks)
+                .ConfigureAwait(false);
         }
 
         private void FibonacciDataConfigure(ISubscriptionConfiguration obj)
         {
         }
 
-        //TODO: CancellationToken
-        private async Task FibonacciDataReceived(FibonacciData data, CancellationToken token)
+        //TODO: read about CancellationToken
+        private async Task FibonacciDataReceivedAsync(FibonacciData data, CancellationToken token)
         {
             _logger.LogInformation($"Received {nameof(FibonacciData)} via MQ API with " +
                                $"{nameof(FibonacciData.SessionId)} = {data.SessionId};" +
-                               $"{nameof(FibonacciData.NiValue)} = {data.NiValue}");
+                               $"{nameof(FibonacciData.NiValue)} = {data.NiValue.ToString()}");
 
             var sessionState = await _distributedCache
-                .GetFromJsonOrCreateAsync<SessionState>(data.SessionId)
+                .GetFromJsonAsync<SessionState>(data.SessionId)
                 .ConfigureAwait(false);
 
             var currentValue = sessionState.NPreviousValue + data.NiValue;
-
-            var answerData = new FibonacciData()
-            {
-                SessionId = data.SessionId,
-                NiValue = currentValue
-            };
-
-            using var httpClient = new HttpClient();
-            var fibonacciRestClient = new FibonacciRestClient(_options.FibonacciRestUri, httpClient);
-
-            await fibonacciRestClient.FibonacciAsync(answerData)
+            
+            await SendFibonacciValueAsync(data.SessionId, currentValue)
                 .ConfigureAwait(false);
 
             sessionState.NPreviousValue = currentValue;
             await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState)
                 .ConfigureAwait(false);
+
+        }
+
+        private Task SendFibonacciValueAsync(string sessionId, int value)
+        {
+            using var httpClient = new HttpClient();
+            var fibonacciRestClient = new FibonacciRestClient(_options.FibonacciRestUri, httpClient);
+
+            var answerData = new FibonacciData()
+            {
+                SessionId = sessionId,
+                NiValue = value
+            };
+
+            //TODO: add http response and exceptions handling
+            return fibonacciRestClient.FibonacciAsync(answerData);
 
         }
     }

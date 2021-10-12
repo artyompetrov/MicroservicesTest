@@ -13,7 +13,6 @@ services:
     ports:
       - "80:80"
     environment:
-      - WORKERS_COUNT=1
       - RMQ_CONNECTION_STRING=host=rabbitmq
  fibonacci.mq:
     build:
@@ -21,6 +20,7 @@ services:
      dockerfile: ./Fibonacci.MQ/Dockerfile
     environment:
       - RMQ_CONNECTION_STRING=host=rabbitmq
-      - FIBONACCI_REST_URI=http://fibonacci.rest/Fibonacci
+      - FIBONACCI_REST_URI=http://fibonacci.rest/      
+      - WORKERS_COUNT=1
 volumes:
   rabbitmq_data:
