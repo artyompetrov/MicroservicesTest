@@ -25,8 +25,18 @@ namespace Fibonacci.MQ
         /// </summary>
         public string FibonacciRestUri { get; private set; }
 
+        /// <summary>
+        /// How many times microservice will try to connect to a broker before it throws an exception
+        /// </summary>
+        public int BrokerConnectionAttempts { get; } = 10;
+
+        /// <summary>
+        /// Attempts timeout in milliseconds
+        /// </summary>
+        public int AttemptsTimeout { get; } = 5000;
+
         #region InitializationAndPrivateFields
-        
+
         private readonly IConfiguration _configuration;
         private static FibonacciMqOptions _instance;
 

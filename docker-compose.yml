@@ -14,6 +14,8 @@ services:
       - "80:80"
     environment:
       - RMQ_CONNECTION_STRING=host=rabbitmq
+    depends_on:
+      - "rabbitmq"
  fibonacci.mq:
     build:
      context: ./
@@ -21,6 +23,9 @@ services:
     environment:
       - RMQ_CONNECTION_STRING=host=rabbitmq
       - FIBONACCI_REST_URI=http://fibonacci.rest/      
-      - WORKERS_COUNT=1
+      - WORKERS_COUNT=7
+    depends_on:
+      - "rabbitmq"
+      - "fibonacci.rest"
 volumes:
   rabbitmq_data:
