@@ -15,6 +15,7 @@ using RabbitMQ.Client.Exceptions;
 
 namespace Fibonacci.MQ.HostedServices
 {
+    //TODO: potentially possible to move Fibonacci values calculation logic to Fibonacci.Common project
     public class FibonacciMqHostedService : BackgroundService
     {
         private readonly IBus _bus;

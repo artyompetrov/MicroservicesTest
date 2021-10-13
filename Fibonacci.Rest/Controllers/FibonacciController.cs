@@ -12,6 +12,7 @@ using EasyNetQ;
 
 namespace Fibonacci.Rest.Controllers
 {
+    //TODO: potentially possible to move Fibonacci values calculation logic to Fibonacci.Common project
     [ApiController]
     [Route("[controller]")]
     public class FibonacciController : ControllerBase
