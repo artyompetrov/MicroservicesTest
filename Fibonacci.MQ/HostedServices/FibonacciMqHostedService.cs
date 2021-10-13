@@ -1,4 +1,4 @@
-﻿using EasyNetQ;
+﻿using Fibonacci.Common;
 using Fibonacci.Common.Extensions;
 using Fibonacci.Common.Model;
 using Fibonacci.MQ.ServiceReferences;
@@ -9,7 +9,8 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Fibonacci.Common;
+//TODO: remove high cohesion with RabbitMQ and EasyNetQ
+using EasyNetQ;
 using RabbitMQ.Client.Exceptions;
 
 namespace Fibonacci.MQ.HostedServices
@@ -47,7 +48,6 @@ namespace Fibonacci.MQ.HostedServices
 
                     break;
                 }
-                //TODO: remove high cohesion with RabbitMQ
                 catch (BrokerUnreachableException e)
                 {
                     _logger.LogWarning($"Unsuccessful Message bus subscribe attempt: {e.GetType()} {e.Message}");

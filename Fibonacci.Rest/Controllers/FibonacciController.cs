@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using EasyNetQ;
 using Fibonacci.Common.Extensions;
 using Fibonacci.Common.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +7,8 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Fibonacci.Common;
-
+//TODO: remove high cohesion with RabbitMQ and EasyNetQ
+using EasyNetQ;
 
 namespace Fibonacci.Rest.Controllers
 {
