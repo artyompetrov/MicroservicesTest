@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -131,6 +132,7 @@ namespace Fibonacci.MQ.HostedServices
                 NiValue = value
             };
 
+            //TODO: may use Polly library instead of cycle
             for (var attempt = 0; attempt < attempts; attempt++)
             {
                 try
@@ -142,8 +144,23 @@ namespace Fibonacci.MQ.HostedServices
                 }
                 catch (FibonacciRestApiException e)
                 {
-                    //TODO: add opposite side session overflow handling
-                    _logger.LogWarning($"Not successful request attempt: {e.GetType()} {e.Message}");
+                    if (e.StatusCode == (int) HttpStatusCode.UnprocessableEntity)
+                    {
+                        var sessionState = await _distributedCache
+                            .GetFromJsonAsync<SessionState>(sessionId, token)
+                            .ConfigureAwait(false);
+
+                        sessionState.Overflow = true;
+
+                        await _distributedCache.SetAsJsonAsync(sessionId, sessionState, token);
+
+                        _logger.LogInformation($"Session {sessionId} overflowed on opposite side");
+
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Not successful request attempt: {e.GetType()} {e.Message}");
+                    }
                 }
 
                 await Task.Delay(_options.AttemptsTimeout, token)
