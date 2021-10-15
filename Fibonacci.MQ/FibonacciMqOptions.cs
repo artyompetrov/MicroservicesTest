@@ -46,7 +46,7 @@ namespace Fibonacci.MQ
         /// <returns></returns>
         public static FibonacciMqOptions Get(IConfiguration configuration)
         {
-            // TODO: should make Get method thread-safe
+            //TODO: should make Get method thread-safe
             if (_instance != null) return _instance;
 
             _instance = new FibonacciMqOptions(configuration);

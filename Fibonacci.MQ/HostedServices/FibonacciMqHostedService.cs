@@ -10,13 +10,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-//TODO: remove high cohesion with RabbitMQ and EasyNetQ
 using EasyNetQ;
 using RabbitMQ.Client.Exceptions;
 
 namespace Fibonacci.MQ.HostedServices
 {
-    //TODO: potentially possible to move Fibonacci values calculation logic to Fibonacci.Common project
     public class FibonacciMqHostedService : BackgroundService
     {
         private readonly IBus _bus;
@@ -66,9 +64,9 @@ namespace Fibonacci.MQ.HostedServices
                 };
 
                 await _distributedCache
-                    .SetAsJsonAsync(randomSessionId, initialSessionState, stoppingToken);
+                    .SetAsJsonAsync(randomSessionId, initialSessionState, CancellationToken.None);
 
-                runningTasks[workerNumber] = SendFibonacciValueAsync(randomSessionId, 1, token: stoppingToken);
+                runningTasks[workerNumber] = SendFibonacciValueAsync(randomSessionId, 1);
             }
 
             await Task.WhenAll(runningTasks);
@@ -79,15 +77,14 @@ namespace Fibonacci.MQ.HostedServices
             
         }
 
-        //TODO: read about CancellationToken
-        private async Task FibonacciDataReceivedAsync(FibonacciData data, CancellationToken token)
+        private async Task FibonacciDataReceivedAsync(FibonacciData data, CancellationToken token = default)
         {
             _logger.LogInformation($"Received {nameof(FibonacciData)} via MQ API with " +
                                $"{nameof(FibonacciData.SessionId)} = {data.SessionId}; " +
                                $"{nameof(FibonacciData.NiValue)} = {data.NiValue.ToString()}");
 
             var sessionState = await _distributedCache
-                .GetFromJsonAsync<SessionState>(data.SessionId, token);
+                .GetFromJsonAsync<SessionState>(data.SessionId);
 
             if (sessionState.Overflow)
             {
@@ -100,7 +97,7 @@ namespace Fibonacci.MQ.HostedServices
             {
                 var currentValue = checked(sessionState.NPreviousValue + data.NiValue);
 
-                await SendFibonacciValueAsync(data.SessionId, currentValue, token: token);
+                await SendFibonacciValueAsync(data.SessionId, currentValue);
 
                 sessionState.NPreviousValue = currentValue;
             }
@@ -111,10 +108,10 @@ namespace Fibonacci.MQ.HostedServices
                 sessionState.Overflow = true;
             }
 
-            await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token);
+            await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState);
         }
 
-        private async Task SendFibonacciValueAsync(string sessionId, int value, int attempts = 5, CancellationToken token = default)
+        private async Task SendFibonacciValueAsync(string sessionId, int value, int attempts = 5)
         {
             using var httpClient = new HttpClient();
             var fibonacciRestClient = new FibonacciRestClient(_options.FibonacciRestUri, httpClient);
@@ -130,7 +127,7 @@ namespace Fibonacci.MQ.HostedServices
             {
                 try
                 {
-                    await fibonacciRestClient.FibonacciAsync(answerData, token);
+                    await fibonacciRestClient.FibonacciAsync(answerData);
 
                     return;
                 }
@@ -139,12 +136,12 @@ namespace Fibonacci.MQ.HostedServices
                     if (e.StatusCode == (int) HttpStatusCode.UnprocessableEntity)
                     {
                         var sessionState = await _distributedCache
-                            .GetFromJsonAsync<SessionState>(sessionId, token)
+                            .GetFromJsonAsync<SessionState>(sessionId)
                             .ConfigureAwait(false);
 
                         sessionState.Overflow = true;
 
-                        await _distributedCache.SetAsJsonAsync(sessionId, sessionState, token);
+                        await _distributedCache.SetAsJsonAsync(sessionId, sessionState);
 
                         _logger.LogInformation($"Session {sessionId} overflowed on opposite side");
                     }
@@ -154,7 +151,7 @@ namespace Fibonacci.MQ.HostedServices
                     }
                 }
 
-                await Task.Delay(_options.AttemptsTimeout, token);
+                await Task.Delay(_options.AttemptsTimeout);
 
             }
 

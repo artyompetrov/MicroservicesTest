@@ -7,13 +7,11 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Fibonacci.Common;
-//TODO: remove high cohesion with RabbitMQ and EasyNetQ
 using EasyNetQ;
 using Microsoft.AspNetCore.Http;
 
 namespace Fibonacci.Rest.Controllers
 {
-    //TODO: potentially possible to move Fibonacci values calculation logic to Fibonacci.Common project
     [ApiController]
     [Route("[controller]")]
     public class FibonacciController : ControllerBase
@@ -32,17 +30,15 @@ namespace Fibonacci.Rest.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(string))]
-        //TODO: read about CancellationToken
-        public async Task<ActionResult> PostAsync([FromBody] FibonacciData data, CancellationToken token)
+        public async Task<ActionResult> PostAsync([FromBody] FibonacciData data)
         {
-            //TODO: read about https://habr.com/ru/post/482354/
             
             _logger.LogInformation($"Received {nameof(FibonacciData)} via WebApi with " +
                                $"{nameof(FibonacciData.SessionId)} = {data.SessionId}; " +
                                $"{nameof(FibonacciData.NiValue)} = {data.NiValue}");
 
             var sessionState = await _distributedCache
-                .GetFromJsonAsync<SessionState>(data.SessionId, token);
+                .GetFromJsonAsync<SessionState>(data.SessionId);
 
             if (sessionState == null)
             {
@@ -58,7 +54,7 @@ namespace Fibonacci.Rest.Controllers
 
                 _logger.LogInformation($"Session {data.SessionId} initialized");
 
-                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token);
+                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState);
             }
 
             if (sessionState.Overflow)
@@ -78,10 +74,10 @@ namespace Fibonacci.Rest.Controllers
                     NiValue = currentValue
                 };
 
-                await _bus.PubSub.PublishAsync(messageBusAnswerData, token);
+                await _bus.PubSub.PublishAsync(messageBusAnswerData);
 
                 sessionState.NPreviousValue = currentValue;
-                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token);
+                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState);
 
                 return Ok();
             }
@@ -89,7 +85,7 @@ namespace Fibonacci.Rest.Controllers
             {
                 sessionState.Overflow = true;
 
-                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token);
+                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState);
 
                 var message = $"Session {data.SessionId} overflowed";
 

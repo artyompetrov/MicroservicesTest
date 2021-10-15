@@ -24,7 +24,7 @@ namespace Fibonacci.Common
 
         private string AddPrefix(string key)
         {
-            //TODO: may be a good idea to implement key concatenation using thread-safe StringBuilder
+            //TODO: may be a good idea to implement key concatenation using some thread-safe StringBuilder
 
             if (_useCommonPrefix)
             {
