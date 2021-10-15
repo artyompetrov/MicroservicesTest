@@ -32,12 +32,14 @@ namespace Fibonacci.Common.Extensions
             CancellationToken token = default)
             where T : class, new()
         {
-            var obj = await GetFromJsonAsync<T>(distributedCache, key, token);
+            var obj = await GetFromJsonAsync<T>(distributedCache, key, token)
+                .ConfigureAwait(false);
 
             if (obj == null)
             {
                 obj = new T();
-                await SetAsJsonAsync(distributedCache, key, obj, token);
+                await SetAsJsonAsync(distributedCache, key, obj, token)
+                    .ConfigureAwait(false);
             }
 
             return obj;

@@ -44,6 +44,7 @@ namespace Fibonacci.MQ
                 app.UseDeveloperExceptionPage();
             }
 
+            /*TODO: delete this 
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
@@ -53,6 +54,8 @@ namespace Fibonacci.MQ
                     await context.Response.WriteAsync("Hello World!");
                 });
             });
+            */
+            
         }
     }
 }

@@ -39,8 +39,7 @@ namespace Fibonacci.Rest.Controllers
                                $"{nameof(FibonacciData.NiValue)} = {data.NiValue.ToString()}");
 
             var sessionState = await _distributedCache
-                .GetFromJsonAsync<SessionState>(data.SessionId, token)
-                .ConfigureAwait(false);
+                .GetFromJsonAsync<SessionState>(data.SessionId, token);
 
             if (sessionState == null)
             {
@@ -56,8 +55,7 @@ namespace Fibonacci.Rest.Controllers
 
                 _logger.LogInformation($"Session {data.SessionId} initialized");
 
-                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token)
-                    .ConfigureAwait(false);
+                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token);
             }
 
             if (sessionState.Overflow)
@@ -77,12 +75,10 @@ namespace Fibonacci.Rest.Controllers
                     NiValue = currentValue
                 };
 
-                await _bus.PubSub.PublishAsync(messageBusAnswerData, token)
-                    .ConfigureAwait(false);
+                await _bus.PubSub.PublishAsync(messageBusAnswerData, token);
 
                 sessionState.NPreviousValue = currentValue;
-                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token)
-                    .ConfigureAwait(false);
+                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token);
 
                 return Ok();
             }
@@ -90,8 +86,7 @@ namespace Fibonacci.Rest.Controllers
             {
                 sessionState.Overflow = true;
 
-                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token)
-                    .ConfigureAwait(false);
+                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token);
 
                 var message = $"Session {data.SessionId} overflowed";
 

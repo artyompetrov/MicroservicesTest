@@ -34,14 +34,12 @@ namespace Fibonacci.MQ.HostedServices
         {
             for (var attempt = 0; attempt < _options.BrokerConnectionAttempts; attempt++)
             {
-                await Task.Delay(_options.AttemptsTimeout, stoppingToken)
-                    .ConfigureAwait(false);
+                await Task.Delay(_options.AttemptsTimeout, stoppingToken);
 
                 try
                 {
                     await _bus.PubSub.SubscribeAsync<FibonacciData>(nameof(FibonacciMqHostedService),
-                            FibonacciDataReceivedAsync, FibonacciDataConfigure, stoppingToken)
-                        .ConfigureAwait(false);
+                        FibonacciDataReceivedAsync, FibonacciDataConfigure, stoppingToken);
 
                     _logger.LogInformation($"Subscribed to {nameof(FibonacciData)} stream successfully");
 
@@ -66,14 +64,12 @@ namespace Fibonacci.MQ.HostedServices
                 };
 
                 await _distributedCache
-                    .SetAsJsonAsync(randomSessionId, initialSessionState, stoppingToken)
-                    .ConfigureAwait(false);
+                    .SetAsJsonAsync(randomSessionId, initialSessionState, stoppingToken);
 
                 runningTasks[workerNumber] = SendFibonacciValueAsync(randomSessionId, 1, token: stoppingToken);
             }
 
-            await Task.WhenAll(runningTasks)
-                .ConfigureAwait(false);
+            await Task.WhenAll(runningTasks);
         }
 
         private void FibonacciDataConfigure(ISubscriptionConfiguration obj)
@@ -89,8 +85,7 @@ namespace Fibonacci.MQ.HostedServices
                                $"{nameof(FibonacciData.NiValue)} = {data.NiValue.ToString()}");
 
             var sessionState = await _distributedCache
-                .GetFromJsonAsync<SessionState>(data.SessionId, token)
-                .ConfigureAwait(false);
+                .GetFromJsonAsync<SessionState>(data.SessionId, token);
 
             if (sessionState.Overflow)
             {
@@ -103,8 +98,7 @@ namespace Fibonacci.MQ.HostedServices
             {
                 var currentValue = checked(sessionState.NPreviousValue + data.NiValue);
 
-                await SendFibonacciValueAsync(data.SessionId, currentValue, token: token)
-                    .ConfigureAwait(false);
+                await SendFibonacciValueAsync(data.SessionId, currentValue, token: token);
 
                 sessionState.NPreviousValue = currentValue;
             }
@@ -115,8 +109,7 @@ namespace Fibonacci.MQ.HostedServices
                 sessionState.Overflow = true;
             }
 
-            await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token)
-                .ConfigureAwait(false);
+            await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, token);
         }
 
         private async Task SendFibonacciValueAsync(string sessionId, int value, int attempts = 5, CancellationToken token = default)
@@ -134,8 +127,7 @@ namespace Fibonacci.MQ.HostedServices
             {
                 try
                 {
-                    await fibonacciRestClient.FibonacciAsync(answerData, token)
-                        .ConfigureAwait(false);
+                    await fibonacciRestClient.FibonacciAsync(answerData, token);
 
                     return;
                 }
@@ -145,9 +137,8 @@ namespace Fibonacci.MQ.HostedServices
                     _logger.LogWarning($"Not successful request attempt: {e.GetType()} {e.Message}");
                 }
 
-                await Task.Delay(_options.AttemptsTimeout, token)
-                    .ConfigureAwait(false);
-                
+                await Task.Delay(_options.AttemptsTimeout, token);
+
             }
 
             throw new FibonacciException("Unable to make a WebApi request, attempts run out");
