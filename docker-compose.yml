@@ -4,8 +4,6 @@ services:
     image: "rabbitmq:3-management"
     ports:
       - "15672:15672"
-    volumes:
-      - 'rabbitmq_data:/data'
  fibonacci.rest:
     build:
      context: ./
@@ -27,5 +25,3 @@ services:
     depends_on:
       - "rabbitmq"
       - "fibonacci.rest"
-volumes:
-  rabbitmq_data:

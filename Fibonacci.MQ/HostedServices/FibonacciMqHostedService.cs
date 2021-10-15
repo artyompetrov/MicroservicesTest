@@ -84,7 +84,7 @@ namespace Fibonacci.MQ.HostedServices
                                $"{nameof(FibonacciData.NiValue)} = {data.NiValue.ToString()}");
 
             var sessionState = await _distributedCache
-                .GetFromJsonAsync<SessionState>(data.SessionId);
+                .GetFromJsonAsync<SessionState>(data.SessionId, CancellationToken.None);
 
             if (sessionState.Overflow)
             {
@@ -97,18 +97,21 @@ namespace Fibonacci.MQ.HostedServices
             {
                 var currentValue = checked(sessionState.NPreviousValue + data.NiValue);
 
-                await SendFibonacciValueAsync(data.SessionId, currentValue);
-
                 sessionState.NPreviousValue = currentValue;
+
+                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, CancellationToken.None);
+                
+                await SendFibonacciValueAsync(data.SessionId, currentValue);
             }
             catch (OverflowException)
             {
                 _logger.LogInformation($"Session {data.SessionId} overflowed");
 
                 sessionState.Overflow = true;
-            }
 
-            await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState);
+                await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState, CancellationToken.None);
+
+            }
         }
 
         private async Task SendFibonacciValueAsync(string sessionId, int value, int attempts = 5)

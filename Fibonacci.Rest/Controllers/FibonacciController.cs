@@ -52,9 +52,11 @@ namespace Fibonacci.Rest.Controllers
                     NPreviousValue = 0
                 };
 
-                _logger.LogInformation($"Session {data.SessionId} initialized");
 
                 await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState);
+
+                _logger.LogInformation($"Session {data.SessionId} initialized");
+
             }
 
             if (sessionState.Overflow)
@@ -68,17 +70,17 @@ namespace Fibonacci.Rest.Controllers
             {
                 var currentValue = checked(sessionState.NPreviousValue + data.NiValue);
 
-                var messageBusAnswerData = new FibonacciData()
+                var messageBusAnswerData = new FibonacciData
                 {
                     SessionId = data.SessionId,
                     NiValue = currentValue
                 };
 
-                await _bus.PubSub.PublishAsync(messageBusAnswerData);
-
                 sessionState.NPreviousValue = currentValue;
                 await _distributedCache.SetAsJsonAsync(data.SessionId, sessionState);
 
+                await _bus.PubSub.PublishAsync(messageBusAnswerData);
+                
                 return Ok();
             }
             catch (OverflowException)
@@ -90,6 +92,7 @@ namespace Fibonacci.Rest.Controllers
                 var message = $"Session {data.SessionId} overflowed";
 
                 _logger.LogInformation(message);
+                
 
                 return UnprocessableEntity(message);
             }
