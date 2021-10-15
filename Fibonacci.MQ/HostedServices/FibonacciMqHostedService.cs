@@ -144,6 +144,8 @@ namespace Fibonacci.MQ.HostedServices
                         await _distributedCache.SetAsJsonAsync(sessionId, sessionState);
 
                         _logger.LogInformation($"Session {sessionId} overflowed on opposite side");
+
+                        return;
                     }
                     else
                     {
