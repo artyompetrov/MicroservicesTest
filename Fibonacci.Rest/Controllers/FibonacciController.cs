@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using EasyNetQ;
 using Fibonacci.Common.Extensions;
 using Fibonacci.Common.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -8,10 +7,13 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Fibonacci.Common;
-
+//TODO: remove high cohesion with RabbitMQ and EasyNetQ
+using EasyNetQ;
+using Microsoft.AspNetCore.Http;
 
 namespace Fibonacci.Rest.Controllers
 {
+    //TODO: potentially possible to move Fibonacci values calculation logic to Fibonacci.Common project
     [ApiController]
     [Route("[controller]")]
     public class FibonacciController : ControllerBase
@@ -20,7 +22,6 @@ namespace Fibonacci.Rest.Controllers
         private readonly IBus _bus;
         private readonly IDistributedCache _distributedCache;
         
-
         public FibonacciController(ILogger<FibonacciController> logger, IDistributedCache distributedCache, IBus bus)
         {
             _logger = logger;
@@ -29,14 +30,16 @@ namespace Fibonacci.Rest.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(string))]
         //TODO: read about CancellationToken
-        public async Task<ActionResult> PostAsync(FibonacciData data, CancellationToken token)
+        public async Task<ActionResult> PostAsync([FromBody] FibonacciData data, CancellationToken token)
         {
             //TODO: read about https://habr.com/ru/post/482354/
             
             _logger.LogInformation($"Received {nameof(FibonacciData)} via WebApi with " +
                                $"{nameof(FibonacciData.SessionId)} = {data.SessionId}; " +
-                               $"{nameof(FibonacciData.NiValue)} = {data.NiValue.ToString()}");
+                               $"{nameof(FibonacciData.NiValue)} = {data.NiValue}");
 
             var sessionState = await _distributedCache
                 .GetFromJsonAsync<SessionState>(data.SessionId, token);

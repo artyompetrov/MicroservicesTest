@@ -13,7 +13,7 @@ namespace Fibonacci.Common.Extensions
             return new KeyPrefixedCacheWrapper(distributedCache, prefix);
         }
 
-        //TODO: check that CancellationToken is used correctly
+
         public static async Task<T> GetFromJsonAsync<T>(this IDistributedCache distributedCache, string key, CancellationToken token = default)
             where T : class
         {
