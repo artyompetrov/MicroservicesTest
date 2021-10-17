@@ -139,8 +139,7 @@ namespace Fibonacci.MQ.HostedServices
                     if (e.StatusCode == (int) HttpStatusCode.UnprocessableEntity)
                     {
                         var sessionState = await _distributedCache
-                            .GetFromJsonAsync<SessionState>(sessionId)
-                            .ConfigureAwait(false);
+                            .GetFromJsonAsync<SessionState>(sessionId);
 
                         sessionState.Overflow = true;
 
