@@ -47,6 +47,8 @@ namespace Fibonacci.MQ
         public static FibonacciMqOptions Get(IConfiguration configuration)
         {
             //TODO: should make Get method thread-safe
+            //TODO: or maybe don't use singleton pattern at all as soon there is no need in it
+            //(instance of this class is being injected as Singleton by DI)
             if (_instance != null) return _instance;
 
             _instance = new FibonacciMqOptions(configuration);
