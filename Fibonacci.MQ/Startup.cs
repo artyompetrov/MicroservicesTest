@@ -29,8 +29,6 @@ namespace Fibonacci.MQ
             var rmqBus = RabbitHutch.CreateBus(options.RmqConnectionString);
             services.AddSingleton<IBus>(rmqBus);
 
-            services.AddSingleton(rmqBus);
-
             // AddDistributedMemoryCache is used because we may need to use Redis (or smth similar) instead of MemoryCache in the future
             services.AddDistributedMemoryCache();
 
